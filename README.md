@@ -173,13 +173,13 @@ pip install -r requirements.txt
 ## 🚀 Running the Baseline
 
 ```bash
-export OPENAI_API_KEY=sk-...
+export GEMINI_API_KEY="AIzaSy..."
 
-# Run with defaults (gpt-4o-mini, 3 episodes per task, seed=42)
+# Run with defaults (gemini-2.5-flash, 3 episodes per task, seed=42)
 python baseline/run_agent.py
 
 # Custom options
-OPENAI_MODEL=gpt-4o NUM_EPISODES=5 SEED=123 python baseline/run_agent.py
+OPENAI_MODEL=gemini-2.5-pro NUM_EPISODES=5 SEED=123 python baseline/run_agent.py
 ```
 
 ### Expected output
@@ -187,7 +187,7 @@ OPENAI_MODEL=gpt-4o NUM_EPISODES=5 SEED=123 python baseline/run_agent.py
 ```
 ============================================================
   Autonomous Warehouse Robot – Baseline Evaluation
-  Model : gpt-4o-mini
+  Model : gemini-2.5-flash
   Seed  : 42
   Episodes per task: 3
 ============================================================
@@ -219,12 +219,12 @@ OPENAI_MODEL=gpt-4o NUM_EPISODES=5 SEED=123 python baseline/run_agent.py
 docker build -t warehouse-robot .
 
 # Run baseline
-docker run -e OPENAI_API_KEY=sk-... warehouse-robot
+docker run -e GEMINI_API_KEY="AIzaSy..." warehouse-robot
 
 # Custom options
 docker run \
-  -e OPENAI_API_KEY=sk-... \
-  -e OPENAI_MODEL=gpt-4o \
+  -e GEMINI_API_KEY="AIzaSy..." \
+  -e OPENAI_MODEL=gemini-2.5-pro \
   -e NUM_EPISODES=5 \
   warehouse-robot
 ```

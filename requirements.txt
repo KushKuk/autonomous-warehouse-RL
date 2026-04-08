@@ -2,3 +2,6 @@ pydantic>=2.0,<3.0
 openai>=1.30,<2.0
 pyyaml>=6.0
 numpy>=1.24
+gradio>=4.44.0
+matplotlib>=3.7.0
+python-dotenv>=1.0.0

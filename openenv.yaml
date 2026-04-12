@@ -1,144 +1,55 @@
 name: autonomous-warehouse-robot
-version: "1.0.0"
+version: "1.1.0"
 description: >
-  An OpenEnv-compliant reinforcement learning environment simulating an
-  autonomous robot navigating a 2-D warehouse grid. The agent picks items
-  from shelves, avoids static and dynamic obstacles, and delivers items to
-  designated stations while managing battery and path efficiency.
+  FastAPI-hosted OpenEnv runtime for the autonomous warehouse robot simulator.
+  The service exposes /reset, /step, and /state endpoints backed by the
+  warehouse environment domain logic.
+
+type: space
+runtime: fastapi
+app: server.app:app
+port: 7860
 
 author: OpenEnv Warehouse Team
 license: MIT
 
-# ---------------------------------------------------------------------------
-# Model references (Python import paths)
-# ---------------------------------------------------------------------------
 observation_model: env.models.Observation
-action_model:      env.models.Action
-reward_model:      env.models.Reward
+action_model: env.models.Action
+reward_model: env.models.Reward
 
-# ---------------------------------------------------------------------------
-# Observation space schema
-# ---------------------------------------------------------------------------
-observation_space:
-  robot:
-    position:        {type: tuple, shape: [2], dtype: float, description: "(row, col) in grid coords"}
-    velocity:        {type: tuple, shape: [2], dtype: float, description: "(vrow, vcol) unit velocity"}
-    heading:         {type: int,   values: [0,1,2,3],        description: "0=North 1=East 2=South 3=West"}
-    battery_level:   {type: float, range: [0.0, 100.0],      description: "Battery percentage"}
-    carrying_item:   {type: bool,                            description: "Whether the robot holds an item"}
-    carried_item_id: {type: int,   nullable: true,           description: "Item ID being carried"}
-  grid_map:          {type: List[List[int]], description: "0=free 1=shelf 2=station 3=charger 4=dynamic_obstacle"}
-  nearby_obstacles:  {type: list,  item_schema: ObstacleInfo}
-  item_locations:    {type: list,  item_schema: ItemInfo}
-  stations:          {type: list,  item_schema: StationInfo}
-  current_target:    {type: tuple, shape: [2], nullable: true}
-  steps_remaining:   {type: int}
-  episode_time:      {type: int}
+server:
+  entrypoint: server/main.py
+  routers:
+    - server/apis/openenv.py
+    - server/apis/system.py
 
-# ---------------------------------------------------------------------------
-# Action space schema
-# ---------------------------------------------------------------------------
-action_space:
-  type: discrete
-  n: 6
-  actions:
-    0: {name: MOVE_FORWARD,  description: "Move one cell in current heading direction"}
-    1: {name: TURN_LEFT,     description: "Rotate 90° counter-clockwise"}
-    2: {name: TURN_RIGHT,    description: "Rotate 90° clockwise"}
-    3: {name: PICK_ITEM,     description: "Pick item at current cell"}
-    4: {name: DROP_ITEM,     description: "Drop item at delivery station"}
-    5: {name: RECHARGE,      description: "Recharge battery at charging station"}
+baseline:
+  script: baseline/run_agent.py
+  notes: Optional CLI baseline runner retained outside the main serving path.
 
-# ---------------------------------------------------------------------------
-# Reward schema (decomposed)
-# ---------------------------------------------------------------------------
-reward_space:
-  type: dense
-  components:
-    step_penalty:         {value: -0.01, description: "Applied every step"}
-    approach_reward:      {scale: 0.05,  description: "Shaping: distance delta toward target"}
-    pickup_reward:        {value: 2.0,   description: "Successful item pickup"}
-    delivery_reward:      {value: 5.0,   description: "Successful item delivery"}
-    collision_penalty:    {value: -1.0,  description: "Collision with wall or obstacle"}
-    invalid_action_penalty:{value: -0.2, description: "Logically invalid action"}
-    battery_penalty:      {value: -0.05, description: "Per step when battery < 20%"}
-    efficiency_bonus:     {value: 2.0,   description: "All deliveries completed under par steps"}
+client:
+  script: client.py
+  scenario_config: scenario_config.json
 
-# ---------------------------------------------------------------------------
-# Task definitions
-# ---------------------------------------------------------------------------
+storage:
+  database: runtime_data/seed_store.db
+
 tasks:
   easy:
-    description: "Single item, no dynamic obstacles, small 8×8 grid"
-    grid_size:             [8, 8]
-    num_items:             1
-    num_static_obstacles:  3
+    grid_size: [8, 8]
+    num_items: 1
+    num_static_obstacles: 3
     num_dynamic_obstacles: 0
-    num_stations:          1
-    num_charging_stations: 1
-    max_steps:             100
-    battery_enabled:       false
-    battery_start:         100.0
-    battery_drain_per_step: 0.3
-    par_steps:             30
-    sensor_range:          3
-    seed_offset:           0
-    grader:                env.tasks.grade_episode
-
+    max_steps: 100
   medium:
-    description: "Three items, static obstacles only, 12×12 grid"
-    grid_size:             [12, 12]
-    num_items:             3
-    num_static_obstacles:  10
+    grid_size: [12, 12]
+    num_items: 3
+    num_static_obstacles: 10
     num_dynamic_obstacles: 0
-    num_stations:          2
-    num_charging_stations: 1
-    max_steps:             300
-    battery_enabled:       false
-    battery_start:         100.0
-    battery_drain_per_step: 0.2
-    par_steps:             150
-    sensor_range:          4
-    seed_offset:           1000
-    grader:                env.tasks.grade_episode
-
+    max_steps: 300
   hard:
-    description: "Five items, dynamic obstacles, battery constraints, 16×16 grid"
-    grid_size:             [16, 16]
-    num_items:             5
-    num_static_obstacles:  20
+    grid_size: [16, 16]
+    num_items: 5
+    num_static_obstacles: 20
     num_dynamic_obstacles: 4
-    num_stations:          3
-    num_charging_stations: 2
-    max_steps:             500
-    battery_enabled:       true
-    battery_start:         100.0
-    battery_drain_per_step: 0.4
-    dynamic_obs_speed:     5
-    par_steps:             300
-    sensor_range:          5
-    seed_offset:           9000
-    grader:                env.tasks.grade_episode
-
-# ---------------------------------------------------------------------------
-# Grader spec
-# ---------------------------------------------------------------------------
-grader:
-  type: deterministic
-  output: float   # [0.0, 1.0]
-  weights:
-    delivery_ratio:    0.50
-    path_efficiency:   0.25
-    collision_score:   0.15
-    invalid_score:     0.10
-  penalties:
-    battery_depleted:  0.80  # multiply final score by this factor
-
-# ---------------------------------------------------------------------------
-# Baseline
-# ---------------------------------------------------------------------------
-baseline:
-  script:    baseline/run_agent.py
-  model:     gpt-4o-mini
-  episodes_per_task: 3
-  seed:      42
+    max_steps: 500

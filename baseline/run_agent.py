@@ -72,15 +72,15 @@ SYSTEM_PROMPT = textwrap.dedent("""\
     You must output ONLY a single action name — nothing else.
 
     ACTIONS AND PRECONDITIONS:
-      MOVE_FORWARD  – Move one cell in the current heading direction.
+      MOVE_FORWARD  - Move one cell in the current heading direction.
                       Fails if the cell ahead is a wall (1), obstacle (4), or out of bounds.
-      TURN_LEFT     – Rotate 90° counter-clockwise. Always succeeds.
-      TURN_RIGHT    – Rotate 90° clockwise. Always succeeds.
-      PICK_ITEM     – Pick up an item. Succeeds ONLY if you are on the EXACT same cell
+      TURN_LEFT     - Rotate 90° counter-clockwise. Always succeeds.
+      TURN_RIGHT    - Rotate 90° clockwise. Always succeeds.
+      PICK_ITEM     - Pick up an item. Succeeds ONLY if you are on the EXACT same cell
                       as an unpicked item AND you are NOT already carrying an item.
-      DROP_ITEM     – Drop your carried item. Succeeds ONLY if you are carrying an item
+      DROP_ITEM     - Drop your carried item. Succeeds ONLY if you are carrying an item
                       AND you are standing on that item's CORRECT target delivery station.
-      RECHARGE      – Recharge battery. Succeeds ONLY if on a charging station (cell = 3).
+      RECHARGE      - Recharge battery. Succeeds ONLY if on a charging station (cell = 3).
 
     GRID CELL ENCODING (shown in local_grid, R = you):
       0 = free floor       1 = wall/shelf (BLOCKED)

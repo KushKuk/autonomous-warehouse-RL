@@ -1,5 +1,5 @@
 """
-Autonomous Warehouse Robot – OpenEnv-compliant environment.
+Autonomous Warehouse Robot - OpenEnv-compliant environment.
 
 The agent navigates a 2-D grid warehouse, picks items from shelves,
 avoids static and dynamic obstacles, and delivers items to stations
@@ -144,8 +144,11 @@ class WarehouseEnv:
     # OpenEnv API
     # ------------------------------------------------------------------
 
-    def reset(self) -> Observation:
+    def reset(self, **kwargs) -> Observation:
         """Reset the environment and return the initial observation."""
+        seed = kwargs.get("seed")
+        if seed is not None:
+            self.base_seed = seed
         self._rng = random.Random(self.base_seed)
 
         # Build the static grid layout
@@ -617,7 +620,7 @@ class WarehouseEnv:
         target = self._current_target()
         robot_state = RobotState(
             position=(float(self._robot_pos[0]), float(self._robot_pos[1])),
-            velocity=_HEADING_DELTA[self._robot_heading],   # unit velocity in heading direction
+            velocity=(float(_HEADING_DELTA[self._robot_heading][0]), float(_HEADING_DELTA[self._robot_heading][1])),   # unit velocity in heading direction
             heading=self._robot_heading,
             battery_level=round(self._battery, 2),
             carrying_item=self._carrying,
@@ -630,7 +633,7 @@ class WarehouseEnv:
             item_locations=deepcopy(self._items),
             stations=deepcopy(self._stations),
             current_target=(
-                (float(target[0]), float(target[1])) if target is not None else None
+                (int(target[0]), int(target[1])) if target is not None else None
             ),
             steps_remaining=self.cfg.max_steps - self._step_count,
             episode_time=self._step_count,

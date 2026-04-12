@@ -1,7 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Autonomous Warehouse Robot – Docker image
-# Base: python:3.10-slim
-# ──────────────────────────────────────────────────────────────────────────────
 FROM python:3.10-slim
 
 # Metadata
@@ -28,11 +24,19 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy project source
-COPY env/       ./env/
-COPY baseline/  ./baseline/
+COPY env/ ./env/
+COPY server/ ./server/
+COPY baseline/ ./baseline/
+COPY client_notebooks/ ./client_notebooks/
+COPY runtime_data/ ./runtime_data/
+COPY app.py ./
+COPY client.py ./
+COPY inference.py ./
+COPY interface.py ./
+COPY models.py ./
+COPY scenario_config.json ./
 COPY openenv.yaml ./
 
-# Default command: run the baseline evaluation script
-# Requires OPENAI_API_KEY to be passed at runtime, e.g.:
-#   docker run -e OPENAI_API_KEY=sk-... warehouse-robot
-CMD ["python", "baseline/run_agent.py"]
+# Default command: run the FastAPI OpenEnv server
+EXPOSE 7860
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]

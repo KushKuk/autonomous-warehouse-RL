@@ -1,6 +1,7 @@
+openenv-core>=0.2.0
 fastapi>=0.110,<1.0
 uvicorn>=0.29,<1.0
 pydantic>=2.0,<3.0
-openai>=1.30,<2.0
+openai>=2.7.2,<3.0
 pyyaml>=6.0
 numpy>=1.24

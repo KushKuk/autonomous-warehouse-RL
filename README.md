@@ -48,11 +48,6 @@ Core runtime files:
 - `Dockerfile` - Docker Space startup
 - `openenv.yaml` - OpenEnv runtime metadata
 - `inference.py` - submission entrypoint
-
-Optional support code:
-
-- `app.py` - Gradio UI implementation
-- `interface.py` - alternate Gradio launcher
 - `baseline/run_agent.py` - older CLI runner
 - `client.py` - local helper client
 
@@ -80,5 +75,5 @@ python inference.py
 ## Notes
 
 - For Hugging Face Spaces, create the Space as `Docker`.
-- Do not select `Gradio` for this repository if you want OpenEnv validators to hit `/reset`, `/step`, and `/state`.
+- This repository no longer includes any Gradio entrypoint; it serves only the FastAPI runtime.
 - `HF_TOKEN` should be stored in Hugging Face Space secrets, not hardcoded in the repository.

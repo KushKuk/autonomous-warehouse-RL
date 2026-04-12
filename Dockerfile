@@ -29,10 +29,8 @@ COPY server/ ./server/
 COPY baseline/ ./baseline/
 COPY client_notebooks/ ./client_notebooks/
 COPY runtime_data/ ./runtime_data/
-COPY app.py ./
 COPY client.py ./
 COPY inference.py ./
-COPY interface.py ./
 COPY models.py ./
 COPY scenario_config.json ./
 COPY openenv.yaml ./

@@ -1,0 +1,16 @@
+{
+  "scenarios": [
+    {
+      "name": "easy_smoke",
+      "task_name": "easy",
+      "seed": 42,
+      "actions": [0, 1, 0, 2]
+    },
+    {
+      "name": "medium_smoke",
+      "task_name": "medium",
+      "seed": 314,
+      "actions": [1, 0, 0, 5]
+    }
+  ]
+}

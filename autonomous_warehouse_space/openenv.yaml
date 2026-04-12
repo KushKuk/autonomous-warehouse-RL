@@ -1,0 +1,55 @@
+name: autonomous-warehouse-robot
+version: "1.1.0"
+description: >
+  FastAPI-hosted OpenEnv runtime for the autonomous warehouse robot simulator.
+  The service exposes /reset, /step, and /state endpoints backed by the
+  warehouse environment domain logic.
+
+type: space
+runtime: fastapi
+app: server.app:app
+port: 7860
+
+author: OpenEnv Warehouse Team
+license: MIT
+
+observation_model: env.models.Observation
+action_model: env.models.Action
+reward_model: env.models.Reward
+
+server:
+  entrypoint: server/main.py
+  routers:
+    - server/apis/openenv.py
+    - server/apis/system.py
+
+baseline:
+  script: baseline/run_agent.py
+  notes: Optional CLI baseline runner retained outside the main serving path.
+
+client:
+  script: client.py
+  scenario_config: scenario_config.json
+
+storage:
+  database: runtime_data/seed_store.db
+
+tasks:
+  easy:
+    grid_size: [8, 8]
+    num_items: 1
+    num_static_obstacles: 3
+    num_dynamic_obstacles: 0
+    max_steps: 100
+  medium:
+    grid_size: [12, 12]
+    num_items: 3
+    num_static_obstacles: 10
+    num_dynamic_obstacles: 0
+    max_steps: 300
+  hard:
+    grid_size: [16, 16]
+    num_items: 5
+    num_static_obstacles: 20
+    num_dynamic_obstacles: 4
+    max_steps: 500

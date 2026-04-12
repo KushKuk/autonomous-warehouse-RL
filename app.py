@@ -23,6 +23,7 @@ matplotlib.use("Agg")
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+import uvicorn
 
 # ── make sure project root is on sys.path ──────────────────────────────────
 ROOT = Path(__file__).parent
@@ -30,6 +31,7 @@ sys.path.insert(0, str(ROOT))
 
 from env.environment import WarehouseEnv
 from env.models import Action, ActionType
+from server.app import app as fastapi_app
 
 # ── try loading .env (optional) ────────────────────────────────────────────
 try:
@@ -602,7 +604,6 @@ with gr.Blocks(css=CSS, title="🤖 Autonomous Warehouse Robot") as demo:
                 max_lines=18,
                 interactive=False,
                 elem_id="log-box",
-                show_copy_button=True,
             )
 
             gr.Markdown("### 📊 Results")
@@ -627,4 +628,9 @@ with gr.Blocks(css=CSS, title="🤖 Autonomous Warehouse Robot") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    launch_mode = os.getenv("WAREHOUSE_LAUNCH_MODE", "fastapi").strip().lower()
+    if launch_mode == "gradio":
+        demo.launch()
+    else:
+        port = int(os.getenv("PORT", "7860"))
+        uvicorn.run(fastapi_app, host="0.0.0.0", port=port)

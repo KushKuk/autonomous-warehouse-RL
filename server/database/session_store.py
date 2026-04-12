@@ -131,3 +131,24 @@ class SessionStore:
             "step_count": row[4],
             "last_state": json.loads(row[5]),
         }
+
+    def fetch_latest_session(self) -> Optional[Dict[str, Any]]:
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT session_id, task_name, seed, done, step_count, last_state_json
+                FROM sessions
+                ORDER BY rowid DESC
+                LIMIT 1
+                """
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "session_id": row[0],
+            "task_name": row[1],
+            "seed": row[2],
+            "done": bool(row[3]),
+            "step_count": row[4],
+            "last_state": json.loads(row[5]),
+        }

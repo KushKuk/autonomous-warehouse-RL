@@ -29,6 +29,8 @@ class ResetResponse(BaseModel):
     session_id: str
     observation: Dict[str, Any]
     info: Dict[str, Any]
+    state: Optional[Dict[str, Any]] = None
+    task: Optional[str] = None
 
 
 class StepResponse(BaseModel):
@@ -38,6 +40,8 @@ class StepResponse(BaseModel):
     done: bool
     info: Dict[str, Any]
     grade: Optional[float] = None
+    state: Optional[Dict[str, Any]] = None
+    reward_total: Optional[float] = None
 
 
 class StateResponse(BaseModel):

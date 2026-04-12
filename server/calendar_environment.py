@@ -32,6 +32,7 @@ class CalendarEnvironmentAdapter:
         self._store = store
         self._sessions: Dict[str, ActiveSession] = {}
         self._lock = threading.Lock()
+        self._latest_session_id: str | None = None
 
     def list_tasks(self) -> list[str]:
         return list(TASKS.keys())
@@ -49,9 +50,12 @@ class CalendarEnvironmentAdapter:
                 "seed": seed,
                 "available_tasks": self.list_tasks(),
             },
+            "state": state["observation"],
+            "task": task_name,
         }
         with self._lock:
             self._sessions[session_id] = ActiveSession(env=env, task_name=task_name, seed=seed)
+            self._latest_session_id = session_id
         self._store.upsert_session(
             session_id=session_id,
             task_name=task_name,
@@ -83,6 +87,8 @@ class CalendarEnvironmentAdapter:
             "done": done,
             "info": info,
             "grade": grade,
+            "state": observation.model_dump(mode="json"),
+            "reward_total": reward.total,
         }
         self._store.upsert_session(
             session_id=session_id,
@@ -100,6 +106,8 @@ class CalendarEnvironmentAdapter:
             done=done,
             payload=payload,
         )
+        with self._lock:
+            self._latest_session_id = session_id
         return payload
 
     def state(self, *, session_id: str) -> dict:
@@ -117,6 +125,13 @@ class CalendarEnvironmentAdapter:
             "session_id": session_id,
             "state": state,
         }
+
+    def latest_session_id(self) -> str | None:
+        with self._lock:
+            if self._latest_session_id is not None:
+                return self._latest_session_id
+        latest = self._store.fetch_latest_session()
+        return None if latest is None else str(latest["session_id"])
 
     def _get_session(self, session_id: str) -> ActiveSession:
         with self._lock:
